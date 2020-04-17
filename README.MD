@@ -21,11 +21,11 @@ $ go get github.com/jinzhu/gorm
 
 ## API list
 
-* `GET` : Get all todos
-* `POST` : Create a todo
-* `GET` : Get a todo
-* `PUT` : Update a todo
-* `DELETE` : Delete a todo
+* `GET` : `v1/todo` Get all todos
+* `POST` : `v1/todo` Create a todo
+* `GET` : `v1/todo/{id}` Get a todo
+* `PUT` : `v1/todo/{id}` Update a todo
+* `DELETE` : `v1/todo/{id}` Delete a todo
 
 ## Post Params
 ```
