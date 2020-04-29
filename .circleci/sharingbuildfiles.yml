@@ -1,0 +1,66 @@
+# Arranging jobs in workflows like build, test and deploy
+# its common to need build artifacts from earlier jobs in later
+# jobs. If build step produce some sort of compiled output, it 
+# would be wasteful to repeat the steps in the build job in the test job
+# so that we can have build output to run the tests against. Similarly in 
+# deploy job it would be wasteful to rerun the build
+
+# CircleCi provides workspace for each workflow run, so that a job can
+# store files in the workspace for later jobs to use. In the case of build
+# test and deploy workflow the build job would store build artifacts into the
+# workspace, and then test and deploy jobs can simply read those files from the
+# workspace rather than wastefully rebuilding them
+
+
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.9
+
+    working_directory: ~/repo
+
+    steps:
+      - run: echo build step
+      - run: mkdir build_output  # creating folder build_output
+      - run: touch build_output/compiled_output.txt # creating file in that folder called compiled_output.text
+      - persist_to_workspace:  # use circleci directive to store output to the file
+          root: build_output
+          paths:
+            - '*'
+
+  test:
+    docker:
+      - image: circleci/golang:1.9
+
+    working_directory: ~/repo
+
+    steps:
+      - run: echo test step
+      - attach_workspace:
+          at: ~/repo/workspace
+      - run: ls ~/repo/workspace/compiled_output.txt  # verifying presence of compiled_output.txt file. If file does not exists ls command returns non-zero exit code causing build to fail
+
+  deploy:
+    docker:
+      - image: circleci/golang:1.9
+
+    working_directory: ~/repo
+
+    steps:
+      - run: echo deploy step
+      - attach_workspace:
+          at: ~/repo/workspace
+      - run: ls ~/repo/workspace/compiled_output.txt
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      -build
+      - test:
+          requires:
+            -build
+      - deploy:
+          requires:
+            -test
