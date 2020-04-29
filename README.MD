@@ -1,4 +1,4 @@
-# Api go simple
+# Api go simple [![CircleCI](https://circleci.com/gh/BinodKafle/gin-todo.svg?style=svg)](https://circleci.com/gh/BinodKafle/gin-todo)
 It is a just simple REST API with Go using:
 1. **Gin Framework**
 2. **Gorm** 
