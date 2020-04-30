@@ -1,0 +1,54 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.9
+
+    working_directory: ~/repo
+
+    steps:
+      - run: echo build step
+
+  test:
+    docker:
+      - image: circleci/golang:1.9
+
+    working_directory: ~/repo
+
+    steps:
+      - run: echo test step
+
+  deploy:
+    docker:
+      - image: circleci/golang:1.9
+
+    working_directory: ~/repo
+
+    steps:
+      - run: echo deploy step
+
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      -build
+      - test:
+          requires:
+            -build
+      - deploy:
+          requires:
+            -test
+          filters: # specifies that we only want deploy job to run in master branch
+            only:
+              - master
+  perf-tests:
+    jobs:
+      - perf-testing
+    triggers:
+      - schedule:  # specified a schedule which has a corn job to run at 2:15 a.m. everyday
+          corn: "15 2 * *"
+          filters:
+            branches: # filtering schedule just to the master branch
+              only:
+                - master
