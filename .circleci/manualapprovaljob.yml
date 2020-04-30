@@ -1,0 +1,57 @@
+# CircleCi supports a manual approval job whose only purpose
+# is to pause a workflow until a human approves it and allows
+# it to continue. A manual approval can be useful to help control
+# the timing of workflow execution in the face of dynamic events that
+# are hard to automate. For instance a deployment introduces a few seconds of
+# downtime, it might be wise to hold that deployment say there's an important
+# demo going on
+
+
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.9
+
+    working_directory: ~/repo
+
+    steps:
+      - run: echo build step
+
+  test:
+    docker:
+      - image: circleci/golang:1.9
+
+    working_directory: ~/repo
+
+    steps:
+      - run: echo test step
+
+  deploy:
+    docker:
+      - image: circleci/golang:1.9
+
+    working_directory: ~/repo
+
+    steps:
+      - run: echo deploy step
+
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      -build
+      - test:
+          requires:
+            -build
+      - hold: # an approval job, hold requires test which means workflow will stop after test job completes 
+          type: approval
+          requires:
+            - test
+      - deploy:
+          requires:
+            -test
+          filters: # specifies that we only want deploy job to run in master branch
+            only:
+              - master
