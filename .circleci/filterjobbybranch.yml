@@ -1,0 +1,83 @@
+# Typically we only want to deploy our code from the
+# master branch. On pull request to other branch we don't
+# want that deploy to run
+
+
+# branch and tag filters
+
+version: 2
+jobs:
+  build:
+    docker:
+      - image: circleci/golang:1.9
+
+    working_directory: ~/repo
+
+    steps:
+      - run: echo build step
+
+  test:
+    docker:
+      - image: circleci/golang:1.9
+
+    working_directory: ~/repo
+
+    steps:
+      - run: echo test step
+
+  deploy:
+    docker:
+      - image: circleci/golang:1.9
+
+    working_directory: ~/repo
+
+    steps:
+      - run: echo deploy step
+
+  test-environment:
+    docker:
+      - image: circleci/golang:1.9
+
+    working_directory: ~/repo
+
+    steps:
+      - run: echo test-environment step
+
+  publish-package:
+    docker:
+      - image: circleci/golang:1.9
+
+    working_directory: ~/repo
+
+    steps:
+      - run: echo publish-package step
+
+
+workflows:
+  version: 2
+  build-and-test:
+    jobs:
+      -build
+      - test:
+          requires:
+            -build
+      - deploy:
+          requires:
+            -test
+          filters: # specifies that we only want deploy job to run in master branch
+            only:
+              - master
+      - test-environment:
+          requires:
+            - test
+          filters:
+            branch:
+              ignore:
+                - master
+  publish:
+    jobs:
+      - publish_package:
+          filters:
+            tags:
+              only:
+                - /v.*/
